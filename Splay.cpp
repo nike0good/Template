@@ -176,7 +176,6 @@ public:
 		maintain(y); maintain(x);
 	} 
 	
-	
 	bool flag;
 	void print(int x)
 	{
