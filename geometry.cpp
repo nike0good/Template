@@ -365,9 +365,6 @@ bool IsSquare(P A,P B,P C,P D) {
 	return IsParallelogram(A,B,C,D)&&IsPerpendicular(B-A,D-A)&&dcmp(Length(B-A)-Length(C-B))==0;
 }
 
-bool IsCollinear(P A,P B,P C,P D) { //¹²Ïß 
-	return !dcmp(Cross(A-B,C-D)) && !dcmp(Cross(A-B,C-B)) && !dcmp(DistanceToLine(A,C,D));
-} 
 //chord-ÏÒ arc-»¡ 
 double ArcDis(double chord,double r) {
 	return 2*asin(chord/2/r)*r;
@@ -573,52 +570,6 @@ double CircleTriangleArea(P A,P B,double m) {
             ans+=opr*fabs(Area2(sol[0],B,O))/2;
             ans+=opr*m*m/2*(Angle(sol[0],A));
         }
-    }
-    return ans;
-}
-double max_polygon_inside_segment(Polygon p) {
-	int n=SI(p);
-	double ans=0;
-	Rep(i,n) Fork(j,i+1,n-1) {
-		P A=p[i],B=p[j];
-		if (A==B) continue;
-		Polygon poly;
-		poly.pb(A); poly.pb(B);
-		Rep(k,n) {
-			P C=p[k],D=p[(k+1)%n];
-			if (IsParallel(A,B,C,D)) {
-				if (IsCollinear(A,B,C,D)) {
-					poly.pb(C);
-					poly.pb(D);
-				}
-			} else {
-				P t=GetLineIntersectionB(A,B,C,D);
-				poly.pb(t);
-			}
-		}
-		sort(ALL(poly));
-		poly.erase(unique(ALL(poly)),poly.end());
-		int sz=SI(poly);
-		double l=0; bool fl=0;
-		For(i,sz-1) {
-			P m=(poly[i]+poly[i-1])/2;
-			if (isPointInPolygon(m,p)) {
-				if(!fl) l=Length(poly[i]-poly[i-1]);
-				else l+=Length(poly[i]-poly[i-1]);
-				ans=max(ans,l);
-				fl=1;
-			}else fl=0;
-		}
-	}
-	return ans;
-}
-double Jinggai_problems(P *p,int n) {
-    int q=1;
-    double ans=INF;
-    Rep(i,n) {
-        while(fabs(Area2(p[i],p[(i+1)%n],p[(q+1)%n]))> fabs(Area2(p[i],p[(i+1)%n],p[q] )) ) 
-            q=(q+1)%n;
-        ans = min( ans, (double)DistanceToSegment(p[q],p[i],p[(i+1)%n]) );          
     }
     return ans;
 }

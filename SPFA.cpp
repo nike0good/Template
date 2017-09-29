@@ -54,7 +54,7 @@ public:
 		MEM(b) MEMI(d) 
 		b[s]=1; d[s]=0;
 		
-		int head=1,tail=1;q[1]=s;
+		int head=1,tail=1;q[1]=1;
 		while(head<=tail)
 		{
 			int now=q[head++];
