@@ -51,7 +51,6 @@ public:
 		father[x]=f;
 		val[x]=v-1;
 	}
-	
 	void build(int &x,int L,int R,int f)
 	{
 		if (L>R) return ;

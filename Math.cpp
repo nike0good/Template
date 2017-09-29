@@ -44,7 +44,8 @@ ll add(ll a,ll b){return (a+b)%F;}
 ll sub(ll a,ll b){return (a-b+(a-b)/F*F+F)%F;}
 void upd(ll &a,ll b){a=(a%F+b%F)%F;}
 char s[]="no solution\n";
-
+//inv[i] = ((p- p/ i )*inv[p % i]) %p.
+ 
 class Math
 {
 public: 
@@ -54,16 +55,15 @@ public:
 		else {gcd(b,a%b,d,y,x); y-=x*(a/b);	}
 	}
 	// n个方程 x=a[i](mod m[i]) (0<=i<n) 
-	ll china(int n,int *a,int *m) {
-		ll M=1,d,y,x=0;
-		Rep(i,n) M*=a[i];
-		Rep(i,n) {
-			ll w=M/m[i];
-			gcd(m[i],w,d,d,y);
-			x=(x+y*w*a[i])%M; 
-		}
-		return (x+M)%M;
-	}
+ 	ll china(int n,int *a,const int *m) {
+        ll M=F-1,d,y,x=0,ans=0;
+        Rep(i,n) {
+            ll w=M/m[i];
+            gcd(w,m[i],d,x,y);
+            ans=(ans+(ll)x*w*a[i])%M; 
+        }
+        return (ans+M)%M;
+    }
 	ll abs(ll x){if (x>=0) return x;return -x;} 
 	ll exgcd(ll a,ll b,ll &x, ll &y)  
 	{  
@@ -119,7 +119,6 @@ public:
 			if (!fl) return i;
 		}
 	}
-	
 	ll Modp(ll a,ll b,ll p)  //a*x=b (mod p)
 	{  
 	    ll x,y;  
@@ -143,12 +142,10 @@ public:
 		MEM(h) MEM(hnum)
 		int m=sqrt(p);while (m*m<p) m++;  
 	    ll res=b,ans=-1;  
-	      
 	    ll uni=pow2(a,m,p);  
 	    if (!uni) if (!b) ans=1;else ans=-1; //特判  
 	    else  
 	    {  
-	          
 	        Rep(i,m+1)  
 	        {  
 	            int t=hash(res);  
@@ -156,14 +153,12 @@ public:
 	            res=(res*a)%p;  
 	        }  
 	        res=uni;  
-	        
 			For(i,m+1)  
 			{  
 	            int t=hash(res);  
 	            if (h[t]) {ans=i*m-(h[t]-1);break;}else hnum[t]=0;  
 	            res=res*uni%p;  
 	        }  
-	        
 		}  
 		return ans; 
 	}  
