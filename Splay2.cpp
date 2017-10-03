@@ -238,7 +238,6 @@ public:
 		printf("%d ",val[x]);
 		print(ch[x][1]);	
 	} 
-	
 }S;
 
 int main()

@@ -45,7 +45,7 @@ int read()
 	return x*f;
 } 
 const int maxn =60000;
-int sum[maxn<<2],a[maxn];;
+int sum[maxn<<2],a[maxn];
 void pushup(int o) {
 	sum[o]=sum[Lson]+sum[Rson];
 }

@@ -365,9 +365,6 @@ bool IsSquare(P A,P B,P C,P D) {
 	return IsParallelogram(A,B,C,D)&&IsPerpendicular(B-A,D-A)&&dcmp(Length(B-A)-Length(C-B))==0;
 }
 
-bool IsCollinear(P A,P B,P C,P D) { //π≤œﬂ 
-	return !dcmp(Cross(A-B,C-D)) && !dcmp(Cross(A-B,C-B)) && !dcmp(DistanceToLine(A,C,D));
-} 
 //chord-œ“ arc-ª° 
 double ArcDis(double chord,double r) {
 	return 2*asin(chord/2/r)*r;
@@ -576,53 +573,98 @@ double CircleTriangleArea(P A,P B,double m) {
     }
     return ans;
 }
-double max_polygon_inside_segment(Polygon p) {
-	int n=SI(p);
-	double ans=0;
-	Rep(i,n) Fork(j,i+1,n-1) {
-		P A=p[i],B=p[j];
-		if (A==B) continue;
-		Polygon poly;
-		poly.pb(A); poly.pb(B);
-		Rep(k,n) {
-			P C=p[k],D=p[(k+1)%n];
-			if (IsParallel(A,B,C,D)) {
-				if (IsCollinear(A,B,C,D)) {
-					poly.pb(C);
-					poly.pb(D);
-				}
-			} else {
-				P t=GetLineIntersectionB(A,B,C,D);
-				poly.pb(t);
-			}
-		}
-		sort(ALL(poly));
-		poly.erase(unique(ALL(poly)),poly.end());
-		int sz=SI(poly);
-		double l=0; bool fl=0;
-		For(i,sz-1) {
-			P m=(poly[i]+poly[i-1])/2;
-			if (isPointInPolygon(m,p)) {
-				if(!fl) l=Length(poly[i]-poly[i-1]);
-				else l+=Length(poly[i]-poly[i-1]);
-				ans=max(ans,l);
-				fl=1;
-			}else fl=0;
+#define MAXN (102345)
+double area[MAXN];
+int Circmp(C a,C b) {return a.r<b.r;}
+struct cp {
+	double angle;
+    int d;
+    cp(){}
+    cp(double angle,int d):angle(angle),d(d){}
+	friend double calc(C c, cp cp1, cp cp2) {
+		P A=c.point(cp1.angle),B=c.point(cp2.angle);
+	    double ans = (cp2.angle - cp1.angle) * c.r* c.r 
+	        - Cross(c.c-A,c.c-B)+Cross(A,B);
+	    return ans *0.5;
+	}
+	friend bool operator<(cp a,cp b){
+		if (dcmp(a.angle-b.angle)!=0) return a.angle<b.angle;
+		return a.d>b.d;
+	}
+}tp[MAXN<<1];
+void CircleUnion_k_Reigon(C c[],int n) {
+	MEM(area)
+	sort(c,c+n,Circmp);
+	int d[MAXN]={};
+	Rep(i,n) {
+		Fork(j,i,n-1) {
+			 if (dcmp(Length(c[i].c-c[j].c) + c[i].r - c[j].r )  <= 0)
+                d[i]++;
 		}
 	}
-	return ans;
-}
-double Jinggai_problems(P *p,int n) {
-    int q=1;
-    double ans=INF;
-    Rep(i,n) {
-        while(fabs(Area2(p[i],p[(i+1)%n],p[(q+1)%n]))> fabs(Area2(p[i],p[(i+1)%n],p[q] )) ) 
-            q=(q+1)%n;
-        ans = min( ans, (double)DistanceToSegment(p[q],p[i],p[(i+1)%n]) );          
+	Rep(i,n) {
+        int cnt = 0;
+       	vector<cp> tp;
+        Rep(j,n) if (i^j) {
+	       	vector<P> sol; sol.clear();
+            getCircleCircleIntersection(c[i],c[j],sol);
+        	int sz=SI(sol);
+			if (sz < 2) continue;
+			cp cp1,cp2;
+			cp1.angle = atan2(sol[0].y - c[i].y, sol[0].x - c[i].x);
+            cp2.angle = atan2(sol[1].y - c[i].y, sol[1].x - c[i].x);
+			cp1.d = 1;    tp.pb(cp1);
+            cp2.d = -1;   tp.pb(cp2);
+            if (dcmp(cp1.angle - cp2.angle) > 0) cnt++;
+        }
+        tp.pb(cp(PI, -cnt));
+        tp.pb(cp(- PI,cnt));
+        sort(ALL(tp));
+        int p, s = d[i] + tp[0].d;
+        For(j,SI(tp)-1) {
+            p = s;  s += tp[j].d;
+            area[p] += calc(c[i], tp[j - 1], tp[j]);
+        }
     }
-    return ans;
+	For(i,n) area[i]-=area[i+1];
 }
-
+double CircleUnion(C c[],int n) {
+	MEM(area)
+	sort(c,c+n,Circmp);
+	int d[MAXN]={};
+	Rep(i,n) {
+		Fork(j,i,n-1) {
+			 if (dcmp(Length(c[i].c-c[j].c) + c[i].r - c[j].r )  <= 0)
+                d[i]++;
+		}
+	}
+	Rep(i,n) {
+        int cnt = 0;
+       	vector<cp> tp;
+        Rep(j,n) if (d[i]==1&&i^j) {
+	       	vector<P> sol; sol.clear();
+            getCircleCircleIntersection(c[i],c[j],sol);
+        	int sz=SI(sol);
+			if (sz < 2) continue;
+			cp cp1,cp2;
+			cp1.angle = atan2(sol[0].y - c[i].y, sol[0].x - c[i].x);
+            cp2.angle = atan2(sol[1].y - c[i].y, sol[1].x - c[i].x);
+			cp1.d = 1;    tp.pb(cp1);
+            cp2.d = -1;   tp.pb(cp2);
+            if (dcmp(cp1.angle - cp2.angle) > 0) cnt++;
+        	
+        }
+        tp.pb(cp(PI, -cnt));
+        tp.pb(cp(- PI,cnt));
+        sort(ALL(tp));
+        int p, s = d[i] + tp[0].d;
+        For(j,SI(tp)-1) {
+            p = s;  s += tp[j].d;
+            area[p] += calc(c[i], tp[j - 1], tp[j]);
+        }
+    }
+    return area[1];
+}
 
 int main()
 {
