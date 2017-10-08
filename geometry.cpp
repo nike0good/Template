@@ -376,6 +376,7 @@ typedef vector<P> Polygon ;
 int isPointInPolygon(P p,Polygon poly) {
 	int wn=0;
 	int n=poly.size();
+	Rep(i,n) if (p==poly[i]) return -1;
 	Rep(i,n) {
 		if (OnSegment(p,poly[i],poly[(i+1)%n])) return -1; //edge
 		int k=dcmp(Cross(poly[(i+1)%n]-poly[i],p-poly[i]));
@@ -621,6 +622,98 @@ double Jinggai_problems(P *p,int n) {
         ans = min( ans, (double)DistanceToSegment(p[q],p[i],p[(i+1)%n]) );          
     }
     return ans;
+}
+#define MAXN (102345)
+double area[MAXN];
+int Circmp(C a,C b) {return a.r<b.r;}
+struct cp {
+	double angle;
+    int d;
+    cp(){}
+    cp(double angle,int d):angle(angle),d(d){}
+	friend double calc(C c, cp cp1, cp cp2) {
+		P A=c.point(cp1.angle),B=c.point(cp2.angle);
+	    double ans = (cp2.angle - cp1.angle) * c.r* c.r 
+	        - Cross(c.c-A,c.c-B)+Cross(A,B);
+	    return ans *0.5;
+	}
+	friend bool operator<(cp a,cp b){
+		if (dcmp(a.angle-b.angle)!=0) return a.angle<b.angle;
+		return a.d>b.d;
+	}
+}tp[MAXN<<1];
+void CircleUnion_k_Reigon(C c[],int n) {
+	MEM(area)
+	sort(c,c+n,Circmp);
+	int d[MAXN]={};
+	Rep(i,n) {
+		Fork(j,i,n-1) {
+			 if (dcmp(Length(c[i].c-c[j].c) + c[i].r - c[j].r )  <= 0)
+                d[i]++;
+		}
+	}
+	Rep(i,n) {
+        int cnt = 0;
+       	vector<cp> tp;
+        Rep(j,n) if (i^j) {
+	       	vector<P> sol; sol.clear();
+            getCircleCircleIntersection(c[i],c[j],sol);
+        	int sz=SI(sol);
+			if (sz < 2) continue;
+			cp cp1,cp2;
+			cp1.angle = atan2(sol[0].y - c[i].y, sol[0].x - c[i].x);
+            cp2.angle = atan2(sol[1].y - c[i].y, sol[1].x - c[i].x);
+			cp1.d = 1;    tp.pb(cp1);
+            cp2.d = -1;   tp.pb(cp2);
+            if (dcmp(cp1.angle - cp2.angle) > 0) cnt++;
+        }
+        tp.pb(cp(PI, -cnt));
+        tp.pb(cp(- PI,cnt));
+        sort(ALL(tp));
+        int p, s = d[i] + tp[0].d;
+        For(j,SI(tp)-1) {
+            p = s;  s += tp[j].d;
+            area[p] += calc(c[i], tp[j - 1], tp[j]);
+        }
+    }
+	For(i,n) area[i]-=area[i+1];
+}
+double CircleUnion(C c[],int n) {
+	MEM(area)
+	sort(c,c+n,Circmp);
+	int d[MAXN]={};
+	Rep(i,n) {
+		Fork(j,i,n-1) {
+			 if (dcmp(Length(c[i].c-c[j].c) + c[i].r - c[j].r )  <= 0)
+                d[i]++;
+		}
+	}
+	Rep(i,n) {
+        int cnt = 0;
+       	vector<cp> tp;
+        Rep(j,n) if (d[i]==1&&i^j) {
+	       	vector<P> sol; sol.clear();
+            getCircleCircleIntersection(c[i],c[j],sol);
+        	int sz=SI(sol);
+			if (sz < 2) continue;
+			cp cp1,cp2;
+			cp1.angle = atan2(sol[0].y - c[i].y, sol[0].x - c[i].x);
+            cp2.angle = atan2(sol[1].y - c[i].y, sol[1].x - c[i].x);
+			cp1.d = 1;    tp.pb(cp1);
+            cp2.d = -1;   tp.pb(cp2);
+            if (dcmp(cp1.angle - cp2.angle) > 0) cnt++;
+        	
+        }
+        tp.pb(cp(PI, -cnt));
+        tp.pb(cp(- PI,cnt));
+        sort(ALL(tp));
+        int p, s = d[i] + tp[0].d;
+        For(j,SI(tp)-1) {
+            p = s;  s += tp[j].d;
+            area[p] += calc(c[i], tp[j - 1], tp[j]);
+        }
+    }
+    return area[1];
 }
 
 

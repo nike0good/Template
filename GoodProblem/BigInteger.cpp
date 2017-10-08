@@ -6,7 +6,8 @@
 #include <string>    // string类
 #include <vector>    // vector类
 using namespace std;
-
+typedef long long ll;
+\
 struct BigInteger {
     typedef unsigned long long LL;
 
@@ -85,6 +86,30 @@ struct BigInteger {
         }
         return c.clean();
     }
+    BigInteger operator / (const ll& b) const {
+        assert(b > 0);  // 除数必须大于0
+        BigInteger c = *this;       // 商:主要是让c.s和(*this).s的vector一样大
+        ll m=0;               // 余数:初始化为0
+        for (int i = s.size()-1; i >= 0; i--) {
+            m = m*BASE + s[i];
+            c.s[i] = m/b ;
+			m -= b*c.s[i];
+        }
+        
+        return c.clean();
+    }
+    BigInteger operator % (const ll& b) const {
+        assert(b > 0);  // 除数必须大于0
+        BigInteger c = *this;       // 商:主要是让c.s和(*this).s的vector一样大
+		ll m=0;               
+        for (int i = s.size()-1; i >= 0; i--) {
+            m = m*BASE + s[i];
+            m%=b;
+        }
+         
+        return BigInteger(m);
+    }
+    
     BigInteger operator % (const BigInteger& b) const { //方法与除法相同
         BigInteger c = *this;
         BigInteger m;
@@ -95,6 +120,7 @@ struct BigInteger {
         }
         return m;
     }
+    
     // 二分法找出满足bx<=m的最大的x
     int bsearch(const BigInteger& b, const BigInteger& m) const{
         int L = 0, R = BASE-1, x;
@@ -109,6 +135,10 @@ struct BigInteger {
     BigInteger& operator *= (const BigInteger& b) {*this = *this * b; return *this;}
     BigInteger& operator /= (const BigInteger& b) {*this = *this / b; return *this;}
     BigInteger& operator %= (const BigInteger& b) {*this = *this % b; return *this;}
+	
+	BigInteger& operator /= (const ll& b) {*this = *this / b; return *this;}
+	BigInteger& operator %= (const ll& b) {*this = *this % b; return *this;}
+    
 
     bool operator < (const BigInteger& b) const {
         if (s.size() != b.s.size()) return s.size() < b.s.size();
@@ -139,6 +169,7 @@ istream& operator >> (istream& in, BigInteger& x) {
     x = s;
     return in;
 }
+
 int main() {
 	BigInteger a,b;
 	a=1; b=1;
