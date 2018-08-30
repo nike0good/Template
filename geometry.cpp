@@ -388,6 +388,24 @@ int isPointInPolygon(P p,Polygon poly) {
 	if (wn!=0) return 1; //inside
 	return 0; //outside
 }
+bool isPointInConvex(P p,Polygon poly){ // Counterclockwise  inside 1 outside 0
+	int n=SI(poly);
+    if(n<3) return 0;
+    if(dcmp(Cross(p-poly[0],poly[1]-poly[0]))>=0) return 0;
+    if(dcmp(Cross(p-poly[0],poly[n-1]-poly[0]))<=0) return 0;
+
+    int i=2,j=n-1;
+    int line=-1;
+    while(i<=j) {
+        int mid=(i+j)>>1;
+        if(dcmp(Cross(p-poly[0],poly[mid]-poly[0]))>=0) {
+            line=mid;
+            j=mid-1;
+        }
+        else i=mid+1;
+    }
+    return dcmp(Cross(p-poly[line-1],poly[line]-poly[line-1]))<0;
+}
 
 int ConvexHull(P *p,int n,P *ch) {
 	sort(p,p+n);
